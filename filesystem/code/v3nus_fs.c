@@ -1085,7 +1085,7 @@ int find_next( find_struct *fs )
 	strcat(test_dir, fs->current_file->d_name );
 	test = opendir( test_dir );
 	if(test) fs->type = TYPE_DIR; else fs->type = TYPE_FILE;
-	closedir( test );
+//00 buggy crashes on BSD	closedir( test );
 	if(fs->current_file->d_name[0]=='.') fs->type = TYPE_DIR;
 
 	if( fs->type == TYPE_FILE )

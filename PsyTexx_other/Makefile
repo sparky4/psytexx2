@@ -1,5 +1,5 @@
 ifeq ($(MAKECMDGOALS),)
-    $(error No target selected. Please type "make palm" or "make linux")
+    $(error No target selected. Please type "make palm", "make linux", or "make bsd")
     exit
 endif
 
@@ -40,6 +40,20 @@ ifeq ($(MAKECMDGOALS),linux)
     PSYTEXX_DEFINES = -DLINUX -DUNIX -DX11 -DCOLOR16BITS -DDEBUGMODE
     CC = i686-linux-gnu-gcc -O3
     CXX = i686-linux-gnu-gcc -O3
+endif
+ifeq ($(MAKECMDGOALS),bsd)
+    # Console libs:
+    #LIBS = -lpthread -lrt -lstdc++  -lossaudio -Wl,-R/usr/X11R7/lib -Wl,/usr/lib/libossaudio.a -L/usr/lib  # -lgpm 
+    #PSYTEXX_DEFINES = -DBSD -DUNIX -DCOLOR8BITS -DTEXTMODE
+    #CC = gcc -O3
+    #CXX = gcc -O3
+    # X11 (OpenGL) libs:
+    #LIBS = -L/usr/X11R6/lib -lpthread -lrt -lstdc++ -lX11 -lGL -lXext
+    # X11 libs:
+    LIBS = -L/usr/X11R7/lib -lpthread -lrt -lX11 -lossaudio -Wl,-R/usr/X11R7/lib -Wl,/usr/lib/libossaudio.a -L/usr/lib
+    PSYTEXX_DEFINES = -DBSD -DLINUX -DUNIX -DX11 -DCOLOR16BITS -DDEBUGMODE -I/usr/X11R7/include/
+    CC = gcc -O3
+    CXX = gcc -O3
 endif
 
 ## ------------------------------------------ ##
@@ -144,6 +158,9 @@ endif
 ## ------------------------------------------ ##
 
 linux: $(OBJECTS)
+	$(CC) $(DEFINES) -o psytexx $(OBJECTS) $(LIBS)
+
+bsd: $(OBJECTS)
 	$(CC) $(DEFINES) -o psytexx $(OBJECTS) $(LIBS)
 
 palm: $(PALM_OBJECTS)

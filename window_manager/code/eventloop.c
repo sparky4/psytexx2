@@ -36,7 +36,9 @@
 #endif
 
 #ifdef LINUX
+#ifndef BSD
 #include <gpm.h>    //Mouse library for console mode
+#endif
     extern void small_pause( long milliseconds );
 #endif
 

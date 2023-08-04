@@ -31,6 +31,8 @@ sound_struct snd; //Main sound structure;
 //## LINUX:                     ##
 //################################
 #ifdef LINUX
+#ifndef BSD
+#define DSPFILE "/dev/dsp"
 #include <fcntl.h>
 #include <linux/soundcard.h>
 #include <pthread.h>
@@ -52,6 +54,34 @@ void *sound_thread (void *arg)
     return 0;
 }
 #endif
+#endif
+
+//################################                                                                           
+//## BSD:                     ##                                                                           
+//################################                                                                           
+#ifdef BSD                                                                                                 
+#define DSPFILE "/dev/audio"
+#include <fcntl.h>                                                                                           
+#include <soundcard.h>                                                                                 
+#include <pthread.h>                                                                                         
+#include <sys/ioctl.h>                                                                                       
+#include <unistd.h>                                                                                          
+int BUFLEN = 1024;                                                                                           
+int dsp;                                                                                                     
+pthread_t pth;                                                                                               
+void *sound_thread (void *arg)                                                                               
+{                                                                                                            
+    if( get_option( OPT_SOUNDBUFFER ) != -1 ) BUFLEN = get_option( OPT_SOUNDBUFFER );                        
+    char buf[ BUFLEN * 4 ];                                                                                  
+    long len = BUFLEN;                                                                                       
+    for(;;) {                                                                                                
+        main_callback( (sound_struct *)arg, 0, buf, len );                                                   
+        if( dsp >= 0 ) write( dsp, buf, len * 4 ); else break;                                               
+    }                                                                                                        
+    pthread_exit(0);                                                                                         
+    return 0;                                                                                                
+}                                                                                                            
+#endif 
 
 //################################
 //## PALMOS:                    ##
@@ -192,7 +222,7 @@ void sound_stream_init(void)
 
 #ifdef LINUX
     //Start first time:
-    dsp = open ( "/dev/dsp", O_WRONLY, 0 );
+    dsp = open ( DSPFILE, O_WRONLY, 0 );
     //dsp = -1;
     if( dsp == -1 )
     {
